@@ -9,10 +9,15 @@ export async function GET(req: Request) {
   const sb = supabaseAdmin();
   const today = new Date().toISOString().slice(0, 10);
 
+  // Use the most recent day with play_date <= today (UTC). This avoids
+  // timezone-mismatch misses where admin schedules a date that doesn't
+  // exactly equal the server's UTC date.
   const { data: day } = await sb
     .from("days")
     .select("id, day_number, play_date, reveal_at")
-    .eq("play_date", today)
+    .lte("play_date", today)
+    .order("play_date", { ascending: false })
+    .limit(1)
     .maybeSingle();
 
   if (!day) return NextResponse.json({ day: null, questions: [], submission: null });

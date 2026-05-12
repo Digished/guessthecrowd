@@ -3,13 +3,23 @@ import { supabaseAdmin } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
-function checkAuth(req: Request) {
-  const auth = req.headers.get("x-admin-password") ?? "";
-  return auth && auth === process.env.ADMIN_PASSWORD;
+function checkAuth(req: Request): { ok: true } | { ok: false; reason: string } {
+  const email = (req.headers.get("x-admin-email") ?? "").trim().toLowerCase();
+  const password = req.headers.get("x-admin-password") ?? "";
+  const expectedEmail = (process.env.ADMIN_EMAIL ?? "").trim().toLowerCase();
+  const expectedPassword = process.env.ADMIN_PASSWORD ?? "";
+  if (!expectedEmail || !expectedPassword) {
+    return { ok: false, reason: "server missing ADMIN_EMAIL or ADMIN_PASSWORD env var" };
+  }
+  if (!email || !password) return { ok: false, reason: "email and password required" };
+  if (email !== expectedEmail) return { ok: false, reason: "email does not match" };
+  if (password !== expectedPassword) return { ok: false, reason: "password does not match" };
+  return { ok: true };
 }
 
 export async function POST(req: Request) {
-  if (!checkAuth(req)) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  const auth = checkAuth(req);
+  if (!auth.ok) return NextResponse.json({ error: `unauthorized: ${auth.reason}` }, { status: 401 });
   const body = await req.json();
   const { play_date, prompts, canonical_groups } = body as {
     play_date: string;
@@ -52,7 +62,8 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-  if (!checkAuth(req)) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  const auth = checkAuth(req);
+  if (!auth.ok) return NextResponse.json({ error: `unauthorized: ${auth.reason}` }, { status: 401 });
   const sb = supabaseAdmin();
   const { data: days } = await sb
     .from("days")

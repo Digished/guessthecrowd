@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 export default function AdminPage() {
+  const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [playDate, setPlayDate] = useState(new Date().toISOString().slice(0, 10));
   const [prompts, setPrompts] = useState<string[]>(["", "", "", "", ""]);
@@ -16,6 +17,7 @@ export default function AdminPage() {
       method: "POST",
       headers: {
         "content-type": "application/json",
+        "x-admin-email": email,
         "x-admin-password": pw,
       },
       body: JSON.stringify({ play_date: playDate, prompts }),
@@ -32,9 +34,20 @@ export default function AdminPage() {
 
       <div className="card p-5 mt-6 space-y-4">
         <div>
+          <label className="text-xs uppercase tracking-widest text-ink/50">Email</label>
+          <input
+            type="email"
+            autoComplete="username"
+            className="input mt-1"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+        <div>
           <label className="text-xs uppercase tracking-widest text-ink/50">Password</label>
           <input
             type="password"
+            autoComplete="current-password"
             className="input mt-1"
             value={pw}
             onChange={(e) => setPw(e.target.value)}
