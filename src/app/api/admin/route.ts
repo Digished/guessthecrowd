@@ -4,8 +4,15 @@ import { supabaseAdmin } from "@/lib/supabase";
 export const dynamic = "force-dynamic";
 
 function checkAuth(req: Request) {
-  const auth = req.headers.get("x-admin-password") ?? "";
-  return auth && auth === process.env.ADMIN_PASSWORD;
+  const email = req.headers.get("x-admin-email") ?? "";
+  const password = req.headers.get("x-admin-password") ?? "";
+  const expectedEmail = process.env.ADMIN_EMAIL ?? "";
+  const expectedPassword = process.env.ADMIN_PASSWORD ?? "";
+  if (!expectedEmail || !expectedPassword) return false;
+  return (
+    email.trim().toLowerCase() === expectedEmail.trim().toLowerCase() &&
+    password === expectedPassword
+  );
 }
 
 export async function POST(req: Request) {

@@ -14,7 +14,7 @@ A daily 5-question game where you try to predict what most people will say. Free
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY`
-   - `ADMIN_PASSWORD` (used to gate `/admin`)
+   - `ADMIN_EMAIL` + `ADMIN_PASSWORD` (gate `/admin`)
 3. `npm install && npm run dev`
 
 ## Daily questions
